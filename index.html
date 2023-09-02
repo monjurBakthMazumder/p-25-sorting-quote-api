@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- tailwind css and daisy ui cdn -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.6.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div class="fixed h-screen w-full bg-white bg-opacity-80 flex justify-center items-center z-50 gap-1" id="loading">
+        <span class="loading loading-dots loading-xs"></span>
+        <span class="loading loading-dots loading-sm"></span>
+        <span class="loading loading-dots loading-md"></span>
+        <span class="loading loading-dots loading-lg"></span>
+    </div>
+    <div class="px-5 md:px-[10%] py-10">
+        <header class="flex flex-col sm:flex-row justify-center items-center gap-2 text-2xl font-semibold mb-5">
+            <h1>Sort By: </h1>
+            <label class="swap">
+                <input type="checkbox" onchange="handleSort()">
+                <div class="swap-off">Author</div>
+                <div class="swap-on">Quotes</div>
+            </label>
+        </header>
+        <main>    
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="container">
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const loading = document.getElementById('loading');
+        loading.classList.add('hidden');
+        let quotesData = [];
+
+        const loadData = async () => {
+            loading.classList.remove('hidden');
+            const res = await fetch(`https://dummyjson.com/quotes`);
+            const data = await res.json();
+            const quotes = data.quotes;
+            console.log(quotes);
+            quotesData = quotes;
+            renderQuotes(quotes);
+        }
+
+        const renderQuotes = (quotes) => {
+            loading.classList.add('hidden');
+            container.innerHTML = '';
+            quotes.forEach(quote => {
+                const card = document.createElement('div');
+                card.classList = `card card-compact border`;
+                card.innerHTML = `
+                <div class="card-body">
+                    <h2 class="text-xl font-semibold">${quote.author}</h2>
+                    <p><b>Quote:</b> ${quote.quote}</p>
+                </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        const handleSort = () => {
+            const sortTypeCheckbox = document.querySelector('input[type="checkbox"]');
+            const sortType = sortTypeCheckbox.checked ? 'author' : 'quotes';
+            const sortedQuotes = [...quotesData];
+            switch (sortType) {
+                case "author":
+                    sortedQuotes.sort((a, b) => a.author.localeCompare(b.author));
+                    break;
+                case "quotes":
+                    sortedQuotes.sort((a, b) => a.quote.localeCompare(b.quote));
+                    break;
+            }
+
+            renderQuotes(sortedQuotes);
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
